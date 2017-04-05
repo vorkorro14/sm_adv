@@ -16,11 +16,11 @@
 #include <avr/io.h>
 #include <string.h>
 
-// Recoding word type from big-endian to little-endian 
+// Recoding word type from little-endian to big-endian 
 #define htons(a)            ((((a)>>8)&0xff)|(((a)<<8)&0xff00))
 #define ntohs(a)            htons(a)
 
-// Recoding dword type from big-endian to little-endian
+// Recoding dword type from little-endian to big-endian
 #define htonl(a)            ( (((a)>>24)&0xff) | (((a)>>8)&0xff00) |\
 (((a)<<8)&0xff0000) | (((a)<<24)&0xff000000) )
 #define ntohl(a)            htonl(a)
@@ -35,9 +35,20 @@ uint8_t mac_addr[6] = {0x00,0x13,0x37,0x01,0x23,0x45};
 // IP-address
 uint32_t ip_addr = inet_addr(192,168,0,222);
 
+
+void eth_reply(eth_frame_t *frame, uint16_t len);
+void eth_filter(eth_frame_t *frame, uint16_t len);
+void arp_filter(eth_frame_t *frame, uint16_t len);
+void send_packet(eth_frame_t *frame, uint16_t len);
+void ip_filter();
+
+
+
+//ETHERNET
+//
+
 #define ETH_TYPE_ARP        htons(0x0806)
 #define ETH_TYPE_IP            htons(0x0800)
-
 
 // Ethernet-frame
 typedef struct eth_frame {
@@ -46,10 +57,6 @@ typedef struct eth_frame {
 	uint16_t type; // protocol
 	uint8_t data[];
 } eth_frame_t;
-
-void send_packet(eth_frame_t *frame, uint16_t len);
-void arp_filter();
-void ip_filter();
 
 // Sending answer to Ethernet-frame
 void eth_reply(eth_frame_t *frame, uint16_t len)
@@ -78,15 +85,4 @@ void eth_filter(eth_frame_t *frame, uint16_t len)
 			break;
 		}
 	}
-}
-
-
-
-int main(void)
-{
-    /* Replace with your application code */
-    while (1) 
-    {
-    }
-}
-
+}A
