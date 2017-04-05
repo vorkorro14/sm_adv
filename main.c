@@ -14,6 +14,7 @@
 
 
 #include <avr/io.h>
+#include <string.h>
 
 // Recoding word type from big-endian to little-endian 
 #define htons(a)            ((((a)>>8)&0xff)|(((a)<<8)&0xff00))
