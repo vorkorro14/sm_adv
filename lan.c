@@ -1,5 +1,5 @@
 /*
- * mc_net.c
+ * lan.c
  *
  * Project: Smart_advertising
  *
@@ -158,7 +158,6 @@ void arp_filter(eth_frame_t *frame, uint16_t len)
 
 int main(void)
 {
-    /* Replace with your application code */
     while (1) 
     {
     }
