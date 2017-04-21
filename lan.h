@@ -19,6 +19,8 @@
 
 #define IP_PACKET_TTL		64
 
+#define ETHMODULE_MAXFRAME  512
+
 
 /*
  * BE conversion
@@ -97,3 +99,39 @@ typedef struct ip_packet {
 	uint32_t to_addr;
 	uint8_t data[];
 } ip_packet_t;
+
+
+/*
+ * ICMP
+ */
+
+#define ICMP_TYPE_ECHO_RQ	8
+#define ICMP_TYPE_ECHO_RPLY	0
+
+typedef struct icmp_echo_packet {
+	uint8_t type;
+	uint8_t code;
+	uint16_t cksum;
+	uint16_t id;
+	uint16_t seq;
+	uint8_t data[];
+} icmp_echo_packet_t;
+
+
+/*
+ * UDP
+ */
+
+typedef struct udp_packet {
+	uint16_t from_port;
+	uint16_t to_port;
+	uint16_t len;
+	uint16_t cksum;
+	uint8_t data[];
+} udp_packet_t;
+
+
+
+void udp_packet(eth_frame_t *frame, uint16_t len);
+uint8_t udp_send(eth_frame_t *frame, uint16_t len);
+void udp_reply(eth_frame_t *frame, uint16_t len);
