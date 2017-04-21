@@ -1,5 +1,5 @@
 /*
- * mc_net.c
+ * lan.c
  *
  * Project: Smart_advertising
  *
@@ -22,7 +22,7 @@ uint32_t ip_addr = IP_ADDR;
 uint32_t ip_mask = IP_SUBNET_MASK;
 uint32_t ip_gateway = IP_DEFAULT_GATEWAY;
 
-uint8_t net_buf[ENC28J60_MAXFRAME];
+uint8_t net_buf[ETHMODULE_MAXFRAME];
 
 uint8_t arp_cache_wr;
 arp_cache_entry_t arp_cache[ARP_CACHE_SIZE];
@@ -35,6 +35,98 @@ void ip_reply(eth_frame_t *frame, uint16_t len);
 uint16_t ip_cksum(uint32_t sum, uint8_t *buf, uint16_t len);
 
 void send_packet(eth_frame_t *frame, uint16_t len);
+
+
+
+/*
+ * UDP
+ */
+
+// send UDP packet
+// fields must be set:
+//	- ip.dst
+//	- udp.src_port
+//	- udp.dst_port
+// uint16_t len is UDP data payload length
+uint8_t udp_send(eth_frame_t *frame, uint16_t len)
+{
+	ip_packet_t *ip = (void*)(frame->data);
+	udp_packet_t *udp = (void*)(ip->data);
+
+	len += sizeof(udp_packet_t);
+
+	ip->protocol = IP_PROTOCOL_UDP;
+	ip->from_addr = ip_addr;
+
+	udp->len = htons(len);
+	udp->cksum = 0;
+	udp->cksum = ip_cksum(len + IP_PROTOCOL_UDP, 
+		(uint8_t*)udp-8, len+8);
+
+	return ip_send(frame, len);
+}
+
+// reply to UDP packet
+// len is UDP data payload length
+void udp_reply(eth_frame_t *frame, uint16_t len)
+{
+	ip_packet_t *ip = (void*)(frame->data);
+	udp_packet_t *udp = (void*)(ip->data);
+	uint16_t temp;
+
+	len += sizeof(udp_packet_t);
+
+	temp = udp->from_port;
+	udp->from_port = udp->to_port;
+	udp->to_port = temp;
+
+	udp->len = htons(len);
+
+	udp->cksum = 0;
+	udp->cksum = ip_cksum(len + IP_PROTOCOL_UDP, 
+		(uint8_t*)udp-8, len+8);
+
+	ip_reply(frame, len);
+}
+
+// process UDP packet
+void udp_filter(eth_frame_t *frame, uint16_t len)
+{
+	ip_packet_t *ip = (void*)(frame->data);
+	udp_packet_t *udp = (void*)(ip->data);
+
+	if(len >= sizeof(udp_packet_t))
+	{
+		udp_packet(frame, ntohs(udp->len) - 
+			sizeof(udp_packet_t));
+	}
+}
+
+
+/*
+ * ICMP
+ */
+
+#ifdef WITH_ICMP
+
+// process ICMP packet
+void icmp_filter(eth_frame_t *frame, uint16_t len)
+{
+	ip_packet_t *packet = (void*)frame->data;
+	icmp_echo_packet_t *icmp = (void*)packet->data;
+
+	if(len >= sizeof(icmp_echo_packet_t) )
+	{
+		if(icmp->type == ICMP_TYPE_ECHO_RQ)
+		{
+			icmp->type = ICMP_TYPE_ECHO_RPLY;
+			icmp->cksum += 8; // update cksum
+			ip_reply(frame, len);
+		}
+	}
+}
+
+#endif
 
 
 /*
@@ -134,6 +226,17 @@ void ip_filter(eth_frame_t *frame, uint16_t len)
 			len = ntohs(packet->total_len) - 
 				sizeof(ip_packet_t);
 
+			switch(packet->protocol)
+			{
+#ifdef WITH_ICMP
+			case IP_PROTOCOL_ICMP:
+				icmp_filter(frame, len);
+				break;
+#endif
+			case IP_PROTOCOL_UDP:
+				udp_filter(frame, len);
+				break;
+			}
 		}
 	//}
 }
