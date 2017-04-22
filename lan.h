@@ -1,10 +1,7 @@
 #pragma once
 
 #include <string.h>
-<<<<<<< HEAD
 #include "ethmod.h"
-=======
->>>>>>> origin/mc_net
 
 
 /*
@@ -23,11 +20,6 @@
 
 #define IP_PACKET_TTL		64
 
-<<<<<<< HEAD
-=======
-#define ETHMODULE_MAXFRAME  512
-
->>>>>>> origin/mc_net
 
 /*
  * BE conversion
@@ -138,7 +130,6 @@ typedef struct udp_packet {
 } udp_packet_t;
 
 
-<<<<<<< HEAD
 /*
  * LAN
  */
@@ -147,8 +138,6 @@ extern uint8_t net_buf[];
 
 void lan_init();
 void lan_poll();
-=======
->>>>>>> origin/mc_net
 
 void udp_packet(eth_frame_t *frame, uint16_t len);
 uint8_t udp_send(eth_frame_t *frame, uint16_t len);
