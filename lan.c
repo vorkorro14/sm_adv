@@ -1253,7 +1253,7 @@ void lan_init()
 
 void lan_poll()
 {
-	uint8_t len;
+	uint16_t len;
 	eth_frame_t *frame = (void*)net_buf;
 
 	while((len = ethmod_recv_packet(net_buf, sizeof(net_buf))))
