@@ -23,8 +23,7 @@
 
 #include <delay.h>
 
-char* string; //входная строка
-size_t N; //количество символов
+
 
 #pragma used+
 
@@ -404,6 +403,8 @@ void display_clear(unsigned char cs) {
 
 
 void main(void) {
+    char* string="1234567890 abcdefghijklmnopqrstuvwxyz.,!"; //входная строка
+    size_t N=40; //количество символов
     int j=1;
     for (int i=0; i<N; ++i) {
         for (int k=0; k<j; ++k) {
