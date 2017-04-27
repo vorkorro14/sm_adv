@@ -121,9 +121,3 @@ void lcd_clean()
 {
     lcd_com(CLEAN);
 }
-
-int main()
-{
-lcd_init();	
-lcd_print("plasmassovi mir pobedil");
-}
