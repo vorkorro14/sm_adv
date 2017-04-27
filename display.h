@@ -81,41 +81,49 @@ void lcd_init (void)
 
 void lcd_data16(char* string)
 {
+    int N=strlen(string);    
     int i = 0;
-    for (i ; i < 16; i++)
-    {
-        lcd_dat(string[i]);
-    }  
+    do {
+	lcd_dat(string[i++]);	
+    } while ((i<N)&&(i<16));
+
 }
 void lcd_data16r(char* string)
 {
-    int i = 0;
-    for (i ; i < 16; i++)
+    int i = 16;
+    int N = strlen(string);
+    for (i ; i < N; i++)
     {
         lcd_dat(string[i]);
         lcd_com(RUN);
-
     }  
 }
  void lcd_print(char* string) 
 {
     
-    int counter = 0;
-    size_t N = strlen(string); //количество символов
+    //int counter = 0;
     lcd_data16(string);
-    lcd_data16r(string + 16);
+    lcd_com(RUN);
+    lcd_data16r(string);
     lcd_com_inf(RUN);
 }
 
 void next_string()
 {
     int i = 0;
-    for (i; i<40  ;i++)
+    for (i; i < 40;i++)
     {
         lcd_com(0b00010000);
     }
 }
+
 void lcd_clean()
 {
     lcd_com(CLEAN);
+}
+
+int main()
+{
+lcd_init();	
+lcd_print("plasmassovi mir pobedil");
 }
